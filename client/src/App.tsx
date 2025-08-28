@@ -11,7 +11,7 @@ import Home from "@/pages/home";
 import Tournaments from "@/pages/tournaments";
 import Leaderboard from "@/pages/leaderboard";
 import Wallet from "@/pages/wallet";
-import Admin from "@/pages/admin";
+import AdminPanel from "@/pages/admin-v2";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,7 +24,7 @@ function Router() {
           <Route path="/tournaments" component={Tournaments} />
           <Route path="/leaderboard" component={Leaderboard} />
           <Route path="/wallet" component={Wallet} />
-          <Route path="/admin" component={Admin} />
+          <Route path="/admin" component={AdminPanel} />
           <Route component={NotFound} />
         </Switch>
       </main>
