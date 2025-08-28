@@ -33,6 +33,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showAdminAccess, setShowAdminAccess] = useState(false);
+  const [adminCode, setAdminCode] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,27 +112,69 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <TabsTrigger value="register" data-testid="tab-register">Register</TabsTrigger>
           </TabsList>
 
-          {/* Quick Login Section */}
-          <div className="mb-6">
-            <div className="text-center mb-3">
-              <p className="text-sm text-muted-foreground">Admin Access:</p>
-            </div>
-            <div className="flex justify-center">
+          {/* Admin Access Section */}
+          <div className="mb-6 text-center">
+            {!showAdminAccess ? (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                onClick={quickLoginAdmin}
-                disabled={isLoading}
-                className="flex items-center gap-2 h-auto py-2"
-                data-testid="quick-login-admin"
+                onClick={() => setShowAdminAccess(true)}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors"
               >
-                <Crown className="w-4 h-4 text-primary" />
-                <div className="text-left">
-                  <div className="text-xs font-medium">Admin</div>
-                  <div className="text-xs text-muted-foreground">Tournament Management</div>
-                </div>
+                Admin Access
               </Button>
-            </div>
+            ) : (
+              <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
+                <div className="text-sm font-medium text-primary flex items-center justify-center gap-2">
+                  <Crown className="w-4 h-4" />
+                  Admin Panel Access
+                </div>
+                <div className="space-y-2">
+                  <input
+                    type="password"
+                    placeholder="Enter admin code..."
+                    value={adminCode}
+                    onChange={(e) => setAdminCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm text-center"
+                    data-testid="admin-code-input"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowAdminAccess(false);
+                        setAdminCode("");
+                      }}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (adminCode === "GAMEARENA2025") {
+                          quickLoginAdmin();
+                          setShowAdminAccess(false);
+                          setAdminCode("");
+                        } else {
+                          toast({
+                            title: "Access Denied",
+                            description: "Invalid admin code!",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      disabled={isLoading || !adminCode}
+                      className="flex-1"
+                      data-testid="admin-login-button"
+                    >
+                      Access
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <TabsContent value="login">
