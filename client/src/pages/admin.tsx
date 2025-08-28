@@ -52,7 +52,7 @@ export default function Admin() {
   }
 
   const { data: adminStats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/admin/stats", { adminId: user.id }],
+    queryKey: ["/api/admin/stats?adminId=" + user.id],
   });
 
   const { data: tournamentsData } = useQuery({
@@ -107,14 +107,14 @@ export default function Admin() {
     },
   });
 
-  const stats = adminStats || {
+  const stats = adminStats?.stats || {
     totalRevenue: 0,
     activeTournaments: 0,
     totalUsers: 0,
     totalTransactions: 0
   };
 
-  const tournaments: Tournament[] = tournamentsData || [];
+  const tournaments: Tournament[] = tournamentsData?.tournaments || [];
 
   return (
     <div className="container mx-auto px-4 py-6" data-testid="admin-page">

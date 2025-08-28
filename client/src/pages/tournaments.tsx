@@ -22,7 +22,7 @@ export default function Tournaments() {
     queryKey: ["/api/tournaments"],
   });
 
-  const tournaments: Tournament[] = data || [];
+  const tournaments: Tournament[] = data?.tournaments || [];
 
   const filteredTournaments = tournaments.filter((tournament) => {
     const matchesSearch = tournament.name.toLowerCase().includes(searchQuery.toLowerCase());

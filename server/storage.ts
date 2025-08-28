@@ -92,26 +92,173 @@ export class MemStorage implements IStorage {
     };
     this.users.set(adminId, admin);
 
-    // Create sample user
-    const userId = randomUUID();
-    const user: User = {
-      id: userId,
-      username: "ProGamer_99",
-      email: "user@gamearena.com",
-      password: "user123",
-      fullName: "Pro Gamer",
-      phoneNumber: "+91-9876543210",
-      avatar: null,
-      walletBalance: "2450.00",
-      totalWinnings: "15350.00",
-      totalGames: 45,
-      winRate: "67.50",
-      rank: 847,
-      isAdmin: "false",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.users.set(userId, user);
+    // Create sample users
+    const users = [
+      {
+        username: "ProGamer_99",
+        email: "user@gamearena.com",
+        password: "user123",
+        fullName: "Pro Gamer",
+        phoneNumber: "+91-9876543210",
+        walletBalance: "2450.00",
+        totalWinnings: "15350.00",
+        totalGames: 45,
+        winRate: "67.50",
+        rank: 847,
+      },
+      {
+        username: "GamingKing",
+        email: "king@gamearena.com", 
+        password: "king123",
+        fullName: "Gaming King",
+        phoneNumber: "+91-9876543211",
+        walletBalance: "5230.00",
+        totalWinnings: "25670.00",
+        totalGames: 78,
+        winRate: "84.60",
+        rank: 234,
+      },
+      {
+        username: "ESportsStar",
+        email: "star@gamearena.com",
+        password: "star123", 
+        fullName: "ESports Star",
+        phoneNumber: "+91-9876543212",
+        walletBalance: "1890.00",
+        totalWinnings: "8940.00",
+        totalGames: 23,
+        winRate: "91.30",
+        rank: 123,
+      },
+      {
+        username: "BattleRoyale",
+        email: "battle@gamearena.com",
+        password: "battle123",
+        fullName: "Battle Royale",
+        phoneNumber: "+91-9876543213", 
+        walletBalance: "3420.00",
+        totalWinnings: "18760.00",
+        totalGames: 56,
+        winRate: "75.00",
+        rank: 456,
+      }
+    ];
+
+    users.forEach(userData => {
+      const userId = randomUUID();
+      const user: User = {
+        ...userData,
+        id: userId,
+        avatar: null,
+        isAdmin: "false",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.users.set(userId, user);
+    });
+
+    // Create sample tournaments
+    const sampleTournaments = [
+      {
+        name: "PUBG Mobile Solo Championship",
+        description: "Epic battle royale tournament with massive prize pool",
+        game: "PUBG",
+        gameMode: "SOLO",
+        maxPlayers: 100,
+        entryFee: "50.00",
+        prizePool: "5000.00",
+        tier: "GOLD",
+        status: "WAITING",
+        roomId: "ROOM123",
+        roomPassword: "PASS123",
+        mapName: "Erangel",
+        startTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+      },
+      {
+        name: "Free Fire Squad Battle",
+        description: "Team up with friends and dominate the battlefield",
+        game: "FREE_FIRE", 
+        gameMode: "SQUAD",
+        maxPlayers: 48,
+        entryFee: "25.00",
+        prizePool: "1200.00",
+        tier: "SILVER",
+        status: "LIVE",
+        roomId: "ROOM456", 
+        roomPassword: "PASS456",
+        mapName: "Bermuda",
+        startTime: new Date(Date.now() - 30 * 60 * 1000), // Started 30 min ago
+      },
+      {
+        name: "PUBG Duo Masters",
+        description: "Partner tournament for experienced players",
+        game: "PUBG",
+        gameMode: "DUO", 
+        maxPlayers: 80,
+        entryFee: "75.00",
+        prizePool: "6000.00",
+        tier: "DIAMOND",
+        status: "STARTING",
+        roomId: "ROOM789",
+        roomPassword: "PASS789", 
+        mapName: "Sanhok",
+        startTime: new Date(Date.now() + 15 * 60 * 1000), // Starting in 15 min
+      },
+      {
+        name: "Free Fire Solo Rush",
+        description: "Fast-paced solo combat tournament",
+        game: "FREE_FIRE",
+        gameMode: "SOLO",
+        maxPlayers: 50,
+        entryFee: "30.00", 
+        prizePool: "1500.00",
+        tier: "BRONZE",
+        status: "FINISHED",
+        roomId: "ROOM101",
+        roomPassword: "PASS101",
+        mapName: "Kalahari",
+        startTime: new Date(Date.now() - 2 * 60 * 60 * 1000), // Finished 2 hours ago
+        endTime: new Date(Date.now() - 1 * 60 * 60 * 1000), // Ended 1 hour ago
+      }
+    ];
+
+    sampleTournaments.forEach((tournamentData, index) => {
+      const tournamentId = randomUUID();
+      const tournament: Tournament = {
+        ...tournamentData,
+        id: tournamentId,
+        currentPlayers: Math.floor(Math.random() * tournamentData.maxPlayers * 0.8),
+        prizeDistribution: { "1": 0.5, "2": 0.3, "3": 0.2 },
+        createdBy: adminId,
+        createdAt: new Date(Date.now() - (index + 1) * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+      };
+      this.tournaments.set(tournamentId, tournament);
+    });
+
+    // Create leaderboard entries
+    const leaderboardPeriods = ["DAILY", "WEEKLY", "MONTHLY", "ALL_TIME"];
+    const userIds = Array.from(this.users.keys());
+    
+    leaderboardPeriods.forEach(period => {
+      userIds.forEach((userId, index) => {
+        const user = this.users.get(userId)!;
+        if (user.isAdmin === "true") return; // Skip admin
+        
+        const leaderboardId = randomUUID();
+        const entry: LeaderboardEntry = {
+          id: leaderboardId,
+          userId,
+          period,
+          totalWinnings: user.totalWinnings,
+          totalGames: user.totalGames,
+          winRate: user.winRate,
+          rank: index + 1,
+          updatedAt: new Date(),
+        };
+        this.leaderboard.set(leaderboardId, entry);
+      });
+    });
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -181,6 +328,13 @@ export class MemStorage implements IStorage {
       ...insertTournament,
       id,
       description: insertTournament.description || null,
+      prizeDistribution: insertTournament.prizeDistribution || null,
+      roomId: insertTournament.roomId || null,
+      roomPassword: insertTournament.roomPassword || null,
+      mapName: insertTournament.mapName || null,
+      startTime: insertTournament.startTime || null,
+      endTime: insertTournament.endTime || null,
+      createdBy: insertTournament.createdBy || null,
       currentPlayers: 0,
       status: "WAITING",
       createdAt: new Date(),

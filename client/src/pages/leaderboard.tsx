@@ -13,10 +13,10 @@ export default function Leaderboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("DAILY");
 
   const { data: leaderboardData } = useQuery({
-    queryKey: ["/api/leaderboard", { period: selectedPeriod }],
+    queryKey: ["/api/leaderboard?period=" + selectedPeriod],
   });
 
-  const leaderboard = leaderboardData || [];
+  const leaderboard = leaderboardData?.leaderboard || [];
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
