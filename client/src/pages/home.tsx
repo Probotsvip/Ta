@@ -33,9 +33,9 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeGame, setActiveGame] = useState("PUBG");
   const [liveStats, setLiveStats] = useState({
-    activePlayers: 24567,
-    liveTournaments: 156,
-    totalPrizePool: 1280000,
+    activePlayers: 0,
+    liveTournaments: 0,
+    totalPrizePool: 0,
   });
 
   const { data: featuredData } = useQuery({
@@ -46,18 +46,21 @@ export default function Home() {
     queryKey: ["/api/tournaments?game=" + activeGame],
   });
 
-  // Live stats animation effect
+  // Calculate real stats from data
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveStats(prev => ({
-        activePlayers: prev.activePlayers + Math.floor(Math.random() * 10) - 5,
-        liveTournaments: prev.liveTournaments + Math.floor(Math.random() * 3) - 1,
-        totalPrizePool: prev.totalPrizePool + Math.floor(Math.random() * 1000) - 500,
-      }));
-    }, 5000);
+    if (featuredData?.tournaments && gameData?.tournaments) {
+      const allTournaments = featuredData.tournaments;
+      const activeTournaments = allTournaments.filter(t => t.status === 'WAITING' || t.status === 'LIVE').length;
+      const totalPrize = allTournaments.reduce((sum, t) => sum + parseFloat(t.prizePool || '0'), 0);
+      const totalPlayers = allTournaments.reduce((sum, t) => sum + (t.currentPlayers || 0), 0);
 
-    return () => clearInterval(interval);
-  }, []);
+      setLiveStats({
+        activePlayers: totalPlayers,
+        liveTournaments: activeTournaments,
+        totalPrizePool: totalPrize,
+      });
+    }
+  }, [featuredData, gameData]);
 
   if (!user) {
     return (
@@ -84,24 +87,24 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
                 <Card className="bg-gaming-card/50 backdrop-blur-sm">
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-primary animate-pulse">
-                      {liveStats.activePlayers.toLocaleString()}+
+                    <div className="text-2xl font-bold text-primary">
+                      {liveStats.activePlayers || 0}
                     </div>
                     <div className="text-xs text-muted-foreground">Active Players</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-gaming-card/50 backdrop-blur-sm">
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-secondary animate-pulse">
-                      {liveStats.liveTournaments}
+                    <div className="text-2xl font-bold text-secondary">
+                      {liveStats.liveTournaments || 0}
                     </div>
                     <div className="text-xs text-muted-foreground">Live Tournaments</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-gaming-card/50 backdrop-blur-sm">
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-accent animate-pulse">
-                      ₹{Math.floor(liveStats.totalPrizePool / 1000)}K+
+                    <div className="text-2xl font-bold text-accent">
+                      ₹{liveStats.totalPrizePool ? Math.floor(liveStats.totalPrizePool).toLocaleString('en-IN') : 0}
                     </div>
                     <div className="text-xs text-muted-foreground">Prize Pool</div>
                   </CardContent>
@@ -201,94 +204,33 @@ export default function Home() {
         <Card className="text-center bg-gaming-card hover:bg-gaming-card/80 transition-colors" data-testid="stat-tournaments">
           <CardContent className="pt-4">
             <Target className="w-6 h-6 mx-auto mb-2 text-primary" />
-            <div className="text-2xl font-bold text-primary animate-pulse">{liveStats.liveTournaments}</div>
+            <div className="text-2xl font-bold text-primary">{liveStats.liveTournaments || 0}</div>
             <div className="text-xs text-muted-foreground">Live Now</div>
           </CardContent>
         </Card>
         <Card className="text-center bg-gaming-card hover:bg-gaming-card/80 transition-colors" data-testid="stat-players">
           <CardContent className="pt-4">
             <Users className="w-6 h-6 mx-auto mb-2 text-secondary" />
-            <div className="text-2xl font-bold text-secondary animate-pulse">{liveStats.activePlayers.toLocaleString()}</div>
-            <div className="text-xs text-muted-foreground">Players Online</div>
+            <div className="text-2xl font-bold text-secondary">{liveStats.activePlayers || 0}</div>
+            <div className="text-xs text-muted-foreground">Total Players</div>
           </CardContent>
         </Card>
         <Card className="text-center bg-gaming-card hover:bg-gaming-card/80 transition-colors" data-testid="stat-prize">
           <CardContent className="pt-4">
             <Trophy className="w-6 h-6 mx-auto mb-2 text-accent" />
-            <div className="text-2xl font-bold text-accent animate-pulse">₹{Math.floor(liveStats.totalPrizePool / 1000)}K</div>
+            <div className="text-2xl font-bold text-accent">₹{liveStats.totalPrizePool ? Math.floor(liveStats.totalPrizePool).toLocaleString('en-IN') : 0}</div>
             <div className="text-xs text-muted-foreground">Total Prize Pool</div>
           </CardContent>
         </Card>
         <Card className="text-center bg-gaming-card hover:bg-gaming-card/80 transition-colors" data-testid="stat-rank">
           <CardContent className="pt-4">
             <Star className="w-6 h-6 mx-auto mb-2 text-primary" />
-            <div className="text-2xl font-bold text-primary">#{user.rank}</div>
+            <div className="text-2xl font-bold text-primary">#{user.rank || 'Unranked'}</div>
             <div className="text-xs text-muted-foreground">Your Global Rank</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Daily Challenges */}
-      <Card className="mb-8 bg-gaming-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sword className="w-5 h-5 text-primary" />
-            Daily Challenges
-            <Badge className="bg-primary text-primary-foreground">2/3 Complete</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <Crosshair className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium">Win 3 PUBG Matches</p>
-                  <p className="text-sm text-muted-foreground">2/3 completed</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-bold text-primary">₹50</div>
-                <Progress value={67} className="w-16 h-2" />
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                  <Trophy className="w-4 h-4 text-secondary-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium">Join 2 Tournaments</p>
-                  <p className="text-sm text-muted-foreground">1/2 completed</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-bold text-secondary">₹75</div>
-                <Progress value={50} className="w-16 h-2" />
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-accent/10 rounded-lg border border-accent/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium text-accent">Reach Top 10 in Free Fire</p>
-                  <p className="text-sm text-muted-foreground">0/1 completed</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-bold text-accent">₹100</div>
-                <Progress value={0} className="w-16 h-2" />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3 mb-8">
@@ -376,53 +318,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* My Active Tournament */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">My Active Tournament</h2>
-        <Card className="bg-gaming-card" data-testid="my-tournament-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                  <Crosshair className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">PUBG Evening Battle</h3>
-                  <p className="text-sm text-muted-foreground">Currently Playing</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-primary">#3</div>
-                <div className="text-xs text-muted-foreground">Current Rank</div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4 text-center mb-4">
-              <div>
-                <div className="text-sm font-medium">12</div>
-                <div className="text-xs text-muted-foreground">Kills</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium">18:45</div>
-                <div className="text-xs text-muted-foreground">Survival Time</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-primary">₹450</div>
-                <div className="text-xs text-muted-foreground">Potential Win</div>
-              </div>
-            </div>
-            
-            <Button 
-              variant="secondary" 
-              className="w-full"
-              data-testid="view-live-match"
-            >
-              <Trophy className="w-4 h-4 mr-2" />
-              View Live Match
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
 
       <CreateTournamentModal
         isOpen={showCreateModal}

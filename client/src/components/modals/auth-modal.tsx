@@ -93,18 +93,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setIsLoading(false);
   };
 
-  const quickLoginUser = async () => {
-    setIsLoading(true);
-    const success = await login("user@gamearena.com", "user123");
-    if (success) {
-      toast({
-        title: "Welcome Back!",
-        description: "Ready to dominate the battlefield?",
-      });
-      onClose();
-    }
-    setIsLoading(false);
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -125,9 +113,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Quick Login Section */}
           <div className="mb-6">
             <div className="text-center mb-3">
-              <p className="text-sm text-muted-foreground">Quick Access:</p>
+              <p className="text-sm text-muted-foreground">Admin Access:</p>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex justify-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -139,21 +127,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <Crown className="w-4 h-4 text-primary" />
                 <div className="text-left">
                   <div className="text-xs font-medium">Admin</div>
-                  <div className="text-xs text-muted-foreground">Full Access</div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={quickLoginUser}
-                disabled={isLoading}
-                className="flex items-center gap-2 h-auto py-2"
-                data-testid="quick-login-user"
-              >
-                <Star className="w-4 h-4 text-secondary" />
-                <div className="text-left">
-                  <div className="text-xs font-medium">Demo</div>
-                  <div className="text-xs text-muted-foreground">Try Now</div>
+                  <div className="text-xs text-muted-foreground">Tournament Management</div>
                 </div>
               </Button>
             </div>
